@@ -1,0 +1,349 @@
+<style type="text/css">
+@charset "utf-8";
+/* CSS Document */
+#target_eb_plugins_iframe {
+	position: absolute;
+	top: 0;
+	left: -999px;
+}
+.etm-d-none { display: none; }
+.redcolor { color: #c00; }
+.greencolor { color: #0C0; }
+.bluecolor { color: #00F; }
+.bold { font-weight: bold; }
+#all_page_for_resize { margin: 5px 0; }
+#all_page_for_resize a,
+#all_page_for_resize span {
+	display: inline-block;
+	border: 1px #ccc solid;
+	line-height: 25px;
+	min-width: 25px;
+	border-radius: 3px;
+	margin: 2px 5px 2px 0;
+	text-align: center;
+}
+#all_page_for_resize span {
+	font-weight: bold;
+	background-color: #333;
+	color: #fff;
+}
+.cur { cursor: pointer; }
+</style>
+<div class="wrap">
+	<h1><a href="{tmp.plugin_link}">{tmp.plugin_name} version {tmp.plugin_version}</a></h1>
+	<div id="list_file_for_resize">{tmp.str_list_file}</div>
+	<div id="all_page_for_resize"></div>
+</div>
+<div style="display:none;">
+	<input type="checkbox" id="EOI_check_for_auto_run">
+	<label for="EOI_check_for_auto_run">Tự động tiếp tục</label>
+</div>
+<div style="position:fixed;bottom:20px;right:20px;z-index:999;">
+	<button type="button" id="click_go_to_current_process" class="cur button cancel">Go to process</button>
+	&nbsp;
+	<button type="button" id="click_check_and_active_process" class="cur button button-primary">Start Optimize</button>
+</div>
+<iframe id="target_eb_plugins_iframe" name="target_eb_plugins_iframe" src="about:blank" width="750" height="600">AJAX form</iframe>
+<script type="text/javascript">
+{tmp.js}
+
+
+//
+function EOI_set_cookies_for_dir_upload () {
+	
+	// save cookies
+	(function ( name, value ) {
+		
+		//
+//		value = value.replace( /\\/g, '/' );
+		
+		//
+		var expires = "";
+		var date = new Date();
+		
+		// default time ( timestamp )
+		days = 3600 * 1000;
+		
+		//
+		date.setTime( date.getTime() + days );
+		
+		expires = "; expires=" + date.toGMTString();
+		
+		//
+		document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+		
+		//
+		console.log( 'set cookie ' + name + ' with value ' + value );
+//	})( EOI_cookies_for_modife, current_dir_upload + '/' + current_year_upload + '/' + current_month_upload + '/' );
+	})( EOI_cookies_for_modife, current_dir_upload );
+//	console.log( current_dir_upload );
+	
+	//
+	setTimeout(function () {
+		EOI_set_cookies_for_dir_upload();
+	}, 1800 * 1000);
+}
+
+
+
+
+//
+var EOI_node_for_current_resize = 0,
+	EOI_time_for_next_resize = 400,
+	EOI_url_list_file = window.location.href.split('&trang=')[0];
+
+
+
+(function () {
+	if ( typeof $ != 'function' ) {
+		$ = jQuery;
+	}
+	
+	//
+//	EOI_set_cookies_for_dir_upload();
+	
+	
+	
+	//
+	var current_version_random = Math.random(),
+		str_no_optimize = '',
+		url_optimize = '',
+		parent_file = '',
+		EOI_basedir = decodeURIComponent(current_dir_upload);
+	EOI_baseurl = decodeURIComponent(EOI_baseurl);
+	
+	//
+	var i = 0;
+	$('#list_file_for_resize div').each(function() {
+		var file_url = $(this).attr('data-path') || '',
+			size = $(this).attr('data-size') || '';
+//		console.log( file_url );
+//		console.log( size );
+		
+		//
+		var path = file_url.replace( EOI_baseurl, EOI_basedir ),
+			file_name = path.split('/'),
+			set_path = file_name.slice();
+		
+		//
+		set_path[ set_path.length - 1 ] = '';
+		set_path = set_path.join('/');
+		
+		//
+		str_no_optimize = '';
+		url_optimize = EOI_url_for_process + '&path=' + encodeURIComponent( set_path ) + '&file=' + encodeURIComponent( file_name[ file_name.length - 1 ] );
+		
+		// file gốc
+		if ( path.split( '-' + size + '.' ).length == 1 ) {
+			str_no_optimize += ' redcolor';
+			url_optimize += '&nooptimize=1';
+			parent_file = encodeURIComponent( file_name[ file_name.length - 1 ] );
+		}
+		// file con
+		else {
+			str_no_optimize += ' click-go-to-resize-function';
+			url_optimize += '&current_width=' + size.split('x')[0];
+			url_optimize += '&current_height=' + size.split('x')[1];
+			
+			//
+//			console.log( path.replace( '-' + size + '.', '.' ) );
+//			if ( parent_file != '' && path.replace( '-' + size + '.', '.' ) == parent_file ) {
+				url_optimize += '&parent_file=' + parent_file;
+//			}
+		}
+		
+		//
+		$(this).html( '<div><a data-href="' + url_optimize + '" href="javascript:;" data-node="' + i + '" class="' + str_no_optimize + '">' + file_name[ file_name.length - 3 ] + '/' + file_name[ file_name.length - 2 ] + '/' + file_name[ file_name.length - 1 ] + ' (' + size + ')</a> <a href="' + file_url + '?v=' + current_version_random + '" target="_blank">-&gt;</a></div>' );
+		
+		//
+		i++;
+	});
+	
+	
+	
+	
+	// version 1
+	var a = $('.list-file-to-li').html() || '',
+		media_url = '',
+		current_version_random = Math.random();
+	
+	if ( 1== 2 && a != '' ) {
+		$('.list-file-to-li').html('');
+		
+		a = a.split("\n");
+		
+		// kiểm tra đúng là số -> thumb
+		var re = /^\d+$/;
+		
+		//
+		for ( var i = 0; i < a.length; i++ ) {
+			
+			// chỉ Optimize với file thumb
+			var check_thumb = a[i].split('-').pop().split('.')[0],
+				url_optimize = EOI_url_for_process + '&file=' + a[i],
+				str_no_optimize = '',
+				class_click_go_to = '',
+				parent_file = a[i].split('-'),
+				current_width = '',
+				current_height = '';
+//			console.log(check_thumb);
+			
+			//
+			if ( check_thumb.split('x').length == 2 ) {
+				current_width = check_thumb.split('x')[0];
+				current_height = check_thumb.split('x')[1];
+			}
+			
+			// recheck
+			if ( check_thumb.split('x').length == 2
+			&& re.test( current_width ) == true
+			&& re.test( current_height ) == true ) {
+//				class_click_go_to = 'click-go-to-resize-function';
+				url_optimize += '&current_width=' + current_width;
+				url_optimize += '&current_height=' + current_height;
+				
+				parent_file[ parent_file.length - 1 ] = '';
+				parent_file = parent_file.join('-');
+				parent_file = parent_file.slice(0, -1) + '.' + a[i].split('.').pop();
+//				parent_file[ parent_file.length - 1 ] = '.' + a[i].split('.').pop();
+				url_optimize += '&parent_file=' + parent_file;
+			}
+			// file gốc
+			else {
+				url_optimize += '&nooptimize=1';
+//				str_no_optimize = '<em class="redcolor">not optimize</em>';
+				str_no_optimize = ' redcolor';
+			}
+//			class_click_go_to = '';
+			
+			//
+			$('.list-file-to-li').append( '<div><a data-href="' + url_optimize + '" href="javascript:;" data-node="' + i + '" class="click-go-to-resize-function ' + class_click_go_to + str_no_optimize + '">' + a[i] + '</a> <a href="' + EOI_baseurl + '/' + current_year_upload + '/' + current_month_upload + '/' + a[i] + '?v=' + current_version_random + '" target="_blank">-&gt;</a></div>' );
+		}
+	}
+	
+	
+	
+	
+	//
+	var str = '';
+	for ( var i = 1; i <= EOI_total_page; i++ ) {
+		if ( i == EOI_current_page ) {
+			str += '<span>' + i + '</span>';
+		}
+		else {
+			str += '<a href="' + EOI_url_list_file + '&trang=' + i + '">' + i + '</a>';
+		}
+	}
+	$('#all_page_for_resize').html( str );
+	
+	
+	
+	
+	//
+	$('#click_go_to_current_process').click(function () {
+		window.scroll( 0, jQuery('.click-go-to-resize-function:first').offset().top - 50 );
+	});
+	
+	
+	
+	
+	//
+	$('.click-go-to-resize-function').click(function () {
+		
+		//
+		$(this).removeClass('click-go-to-resize-function');
+//		$(this).removeClass('click-go-to-resize-function').off('click');
+		
+		//
+		var a = $(this).attr('data-href') || '',
+			_id = $(this).attr('data-node') || '';
+//		console.log(a);
+		
+		//
+		if ( a == '' ) {
+			return false;
+		}
+		
+		//
+		_id = '_eoi_node_in_' + _id;
+		
+		if ( $('#' + _id).length == 0 ) {
+			$(this).after( ' <span id="' + _id + '">...</span> ' );
+		}
+		
+		//
+		$.ajax({
+			type: 'POST',
+			url: a,
+			data: ''
+		}).done(function(msg) {
+			$('#' + _id).html(msg);
+			
+			EOI_node_for_current_resize++;
+			
+			//
+			if ( $('.click-go-to-resize-function').length > 0 ) {
+				setTimeout(function () {
+					if ( document.getElementById('EOI_check_for_auto_run').checked == true ) {
+						$('.click-go-to-resize-function:first').click();
+						
+						//
+						if ( EOI_node_for_current_resize % 15 == 0 ) {
+							$('#click_go_to_current_process').click();
+						}
+					}
+				}, EOI_time_for_next_resize);
+			} else if ( EOI_current_page < EOI_total_page ) {
+				EOI_create_url_and_next_page();
+			} else {
+				alert('All done!');
+			}
+		});
+	});
+	
+	//
+	$('#EOI_check_for_auto_run').click(function () {
+		if ( document.getElementById('EOI_check_for_auto_run').checked == true ) {
+			$('.click-go-to-resize-function:first').click();
+		}
+	});
+	
+	//
+	$('#click_check_and_active_process').click(function () {
+		if ( document.getElementById('EOI_check_for_auto_run').checked == true ) {
+			document.getElementById('EOI_check_for_auto_run').checked = false;
+			$(this).html('Start Optimize');
+		} else {
+			document.getElementById('EOI_check_for_auto_run').checked = true;
+			$(this).html('Stop Optimize');
+			$('.click-go-to-resize-function:first').click();
+		}
+	});
+	
+	//
+	if ( window.location.href.split('auto_next_page').length > 1 ) {
+		document.getElementById('EOI_check_for_auto_run').checked = true;
+		$('.click-go-to-resize-function:first').click();
+	}
+	
+	// Tự động chuyển trang nếu không tìm thấy
+	if ( document.getElementById('EOI_check_for_auto_run').checked == true
+	&& EOI_current_page < EOI_total_page ) {
+		EOI_create_url_and_next_page();
+	}
+	
+})();
+
+
+
+function EOI_create_url_and_next_page () {
+	var next_url = EOI_url_list_file + '&trang=' + ( EOI_current_page + 1 );
+	
+	if ( document.getElementById('EOI_check_for_auto_run').checked == true ) {
+		next_url += '&auto_next_page=1';
+	}
+	
+	window.location = next_url;
+}
+
+</script> 
